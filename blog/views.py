@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from .models import Blog, Comment
 from django.core.paginator import Paginator
 from django.utils import timezone
-
+from .forms import BlogForm
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
@@ -27,13 +27,19 @@ def detail(request,blog_id):
 def new(request):
     return render(request, 'new.html')
 
+
 def create(request):
-    blog =Blog()
-    blog.title = request.GET['title']
-    blog.body = request.GET['body']
-    blog.pub_date = timezone.datetime.now()
-    blog.save()
-    return redirect('/blog/' + str(blog.id))
+    if request.method == 'POST':
+        form = BlogForm(request.POST)  
+        if form.is_valid():
+            blog = form.save(commit = False)
+            blog.pub_date = timezone.datetime.now()
+            blog.save()
+            return redirect('home')
+    else:
+        form = BlogForm()
+    return render(request,'new.html', {'form':form})
+    
 
 
 def edit(request, blog_id):
@@ -84,7 +90,9 @@ def comment_edit(request, comment_id):
 def comment_delete(request, comment_id):
     comment = get_object_or_404(Comment, pk = comment_id)
     if request.user == comment.user:
-        comment.delete()
-        return redirect('/blog/' + str(comment.post.id))
+        if request.method == "POST":
+            post_id = comment.post.id
+            comment.delete()
+            return redirect('/blog/' + str(post_id))
     else:
         return HttpResponse('잘못된 접근입니다.')
