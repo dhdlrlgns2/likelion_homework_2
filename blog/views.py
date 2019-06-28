@@ -17,7 +17,6 @@ def detail(request,blog_id):
     #글에 달려있는 모든 comment 모델 데이터 불러오기
     comment_list = Comment.objects.all()
     
-
     blog_details = get_object_or_404(Blog,pk = blog_id)
     return render(request,'detail.html', {'details':blog_details})
 
@@ -35,7 +34,7 @@ def create(request):
             blog = form.save(commit = False)
             blog.pub_date = timezone.datetime.now()
             blog.save()
-            return redirect('home')
+            return redirect('/blog/' + str(blog.id))
     else:
         form = BlogForm()
     return render(request,'new.html', {'form':form})

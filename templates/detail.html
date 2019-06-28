@@ -15,16 +15,18 @@
 {% for comment in details.comments.all %}
     {{comment.user.username}} : {{comment.body}}
     {% if comment.user == request.user %}
+    {% csrf_token %}
     <a href="{% url 'comment_edit' comment.id %} ">편집</a>
-    <a href="javascript: {document.getElementById('delete').submit()}">삭제</a>
-    <form id = "delete" method = "POST" action="{% url 'comment_delete' comment.id %}">
-
-        {% csrf_token %} <input type = "hidden" />
-    </form>
+    <a href="javascript: {
+        var form = document.getElementById('delete');
+        formaction = '/blog/comment_delete/{{comment.id}}';
+        form.submit();}">삭제</a>        
+    
     {% endif %}
     
     <br>
 {% endfor %}
-
-
+<form id = "delete" method = "POST" action=""></form>
+{% csrf_token %} <input type = "hidden" />
+</form>
 {% endblock %}
